@@ -33,13 +33,30 @@ class Deck():
             #swap card at position i with card at random number r
             self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
 
-    def draw_card(self):
+    def draw_card(self): #draw from the top of the deck
         return self.cards.pop()
 
+
+class Player():
+    def __init__(self, name):
+        self.name = name
+        self.hand = []
+
+    def draw(self, deck):
+        self.hand.append(deck.draw_card())
+        return self
+        
+
+    def show_hand(self):
+        for c in self.hand:
+            c.show()
 
 
 deck = Deck()
 deck.shuffle_deck()
 
-card = deck.draw_card()
-card.show()
+bob = Player("Bob")
+bob.draw(deck)
+
+print(f"{bob.name} drew the card ", end="")
+bob.show_hand()
