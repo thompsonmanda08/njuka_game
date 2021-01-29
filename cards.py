@@ -1,3 +1,5 @@
+import random
+
 class Card():
     def __init__(self, suit, value):
         self.suit = suit
@@ -24,12 +26,20 @@ class Deck():
         for card in self.cards:
             card.show()
 
+    def shuffle_deck(self):
+        #assigns i a number between 0 and total number of cards -1, counting backwards from the total number of cards
+        for i in range(len(self.cards)- 1, 0, -1): 
+            r = random.randint(0 , i) #Assigns a random between 0 and i to the r variable
+            #swap card at position i with card at random number r
+            self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
+
+    def draw_card(self):
+        return self.cards.pop()
 
 
-card = Card("H", 7)
-card.show()
-
-print("\n")
 
 deck = Deck()
-deck.show()
+deck.shuffle_deck()
+
+card = deck.draw_card()
+card.show()
