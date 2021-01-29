@@ -29,7 +29,7 @@ class Deck():
 card = Card("H", 7)
 card.show()
 
-print("\n\n")
+print("\n")
 
 deck = Deck()
 deck.show()
