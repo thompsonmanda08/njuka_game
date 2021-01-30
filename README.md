@@ -17,7 +17,8 @@ Shuffle the deck again and let the players take turns drawing one card at a time
 Every time a player draws a card, check if the player has won based on the criteria established in the introduction, else, the player is required to drop one card from their hand before the next player can take their turn to draw a card from the deck.
 
 
-** Extra Challenge ** 
+** Extra Features Challenge ** 
+
 BEYOND THE BASICS:
 -> allow a player to winner via number line
 
