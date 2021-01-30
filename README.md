@@ -5,11 +5,7 @@ A game of cards where the winner is first person to hold a hand of two identical
 To start the game you need a standard deck of cards minus the picture cards (jack, queen and king) thus the deck will have have 40 cards(10 per suit)
 
 
-Next you need to determine the number of players participating in the game
-
-
-After that, shuffle the deck of cards and deal each player a set of three cards
-
+Next you need to determine the number of players participating in the game. After that, shuffle the deck of cards and deal each player a set of three cards.
 
 Shuffle the deck again and let the players take turns drawing one card at a time from the top of the deck
 
