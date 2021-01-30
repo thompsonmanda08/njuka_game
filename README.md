@@ -1,5 +1,4 @@
 # njuka_game
-Card Game
 
 A game of cards where the winner is first person to hold a hand of two identical cards and two other cards that are of sequential values i.e have a difference of one
 
@@ -21,9 +20,15 @@ Every time a player draws a card, check if the player has won based on the crite
 ** Extra Challenge ** 
 BEYOND THE BASICS:
 -> allow a player to winner via number line
+
 -> allow a player to win by a card dropped by another palyer
+
 -> allow two players to swap cards
+
 -> in the case that a player draws a card and their hand consists of 2 pairs of numerically identical cards e.g (two 2s and two 8s) allow the player to drop any two cards and draw one from the deck
+
 -> Introduce the 'K', 'Q' and 'J' to make a complete deck of cards.
+
 -> Allow players to win with special rules of the K, Q and J cards.
+
 -Last but not least - introduce the joker card
