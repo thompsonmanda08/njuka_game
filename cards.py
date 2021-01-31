@@ -6,11 +6,14 @@ class Card:
         self.suit = suit
         self.value = value
 
-    def show(self):
+    def display(self):
         if self.value == 1:
             print(f"{'A'} of {self.suit}")
         else:
             print(f"{self.value} of {self.suit}")
+
+    def __repr__(self):
+        return f"{self.value} of {self.suit}"
 
 
 class Deck:
@@ -25,31 +28,29 @@ class Deck:
 
     def show(self):
         for card in self.cards:
-            card.show()
+            card.display()
 
-    def shuffle_deck(self):
+    def shuffle(self):
         # assigns i a number between 0 and total number of cards -1, counting backwards from the total number of cards
         for i in range(len(self.cards) - 1, 0, -1):
             r = random.randint(0, i)  # Assigns a random between 0 and i to the r variable
             # swap card at position i with card at random number r
             self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
 
-    def draw_card(self):  # draw from the top of the deck
-        return self.cards.pop()
+    def deal(self, players_list):
+        # deals 3 cards to each player in the players_list of the game
+        for player in players_list:
+            player.hand = self.cards[-3:]
+            self.cards = self.cards[:-3]
 
-
-def deal_cards(deck, players):
-    # deals 3 cards to each player in the game
-    pass
+    def __str__(self):
+        return f"{self.cards}"
 
 
 """
-deck = Deck()
-deck.shuffle_deck()
-
-bob = Player("Bob")
-bob.draw(deck)
 
 # testing the player attributes here
 print(f"{bob.name} drew the card ", end="")
-bob.show_hand()"""
+bob.show_hand()
+
+"""
