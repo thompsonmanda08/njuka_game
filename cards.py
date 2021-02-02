@@ -47,10 +47,3 @@ class Deck:
         return f"{self.cards}"
 
 
-"""
-
-# testing the player attributes here
-print(f"{bob.name} drew the card ", end="")
-bob.show_hand()
-
-"""
