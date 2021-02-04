@@ -12,7 +12,7 @@ class Player:
         self.hand.append(deck.cards.pop())
         return self
 
-    def drop(self, hand, pool):
+    def drop(self, hand, card_pool):
         # The user will enter the index of the card they want to drop
         """
         from their hand we need to find the exact card value that means
@@ -28,8 +28,8 @@ class Player:
         index = int(input("Enter the card value you want to drop! "))
         card_index = index - 1
         dropped_card = self.hand.pop(card_index)
-        pool.append(dropped_card)
-        return self, pool
+        card_pool.append(dropped_card)
+        return card_pool
 
     def show_hand(self):
         index = 1
@@ -81,17 +81,24 @@ def next_player(players_list, current_player):
             Game.play(players_list[i + 1], deck)
 
 
-def check_winner(player, hand):
-    duplicate_pair_1 = None
-    duplicate_pair_2 = None
-    matching_pair = False
+def check_winner(player, hand, card_pool):
     current_player = player
+
     card_values = []
     card_values_set = set()
-    duplicate_value = None
+
     duplicate_card_values = None
+    duplicate_value = None
+    duplicate_pair_1 = None
+    duplicate_pair_2 = None
     duplicate_cards = []
+    matching_pair = False
+    sequential_pair = False
+
+    unique_card_values = None
+    unique_cards = None
     sequential_cards = []
+
     winning_cards = []
 
     for card in range(len(hand)):
@@ -101,7 +108,7 @@ def check_winner(player, hand):
     # check the list for duplicate card values and returns a list
     duplicate_card_values = check_for_duplicates(card_values)
 
-    if duplicate_card_values: # checks if there is any duplicate card values
+    if duplicate_card_values:  # checks if there is any duplicate card values
         # for duplicate card value we card find the cards with
         for i in range(len(duplicate_card_values)):
             duplicate_value = duplicate_card_values[i]
@@ -110,12 +117,11 @@ def check_winner(player, hand):
         card_values_set.remove(duplicate_value)
         unique_card_values = list(card_values_set)
 
+        # Finds the duplicate card values and appends them to a new list
         for card in range(len(hand)):
             if hand[card].value == duplicate_value:
                 duplicate_cards.append(hand[card])
                 matching_pair = True
-
-        # Here we have our duplicate cards
         print("The duplicate cards are: ", end="")
         print(duplicate_cards)
 
@@ -132,18 +138,35 @@ def check_winner(player, hand):
 
     # If No duplicates found then there is no chance of winning
     else:
-        print(None)
         # player must choose a card to drop
         # after player has dropped a card into the pool, next player can draw
-
+        print(f"ALL CARDS ARE UNIQ CARDS = {current_player.hand}")
+        print("You must drop a card for the next player to go!")
+        card_pool = current_player.drop(current_player.hand, card_pool)
+        print(f"{current_player.name} dropped {card_pool[-1]}")
+        return card_pool, current_player
+        # next_player(current_player)
+        # Now go to next_player()
 
     if matching_pair:
-        print(f" IF MACTCHING PAIR THEN UNIQ = {unique_card_values} \n")
-        check_for_sequencial()
+        print(f" IF MATCHING PAIR EXISTS THEN UNIQ = {unique_card_values} \n")
+        # Bool - Checks for consecutive numbers for the cards - Returns True or False
+        sequential_pair = check_for_sequence(unique_card_values)
+
+        if sequential_pair:
+            for card in range(len(unique_card_values)):
+                if hand[card].value == unique_card_values[card]:
+                    sequential_cards.append(hand[card])
+            print(sequential_cards)
+
+        else:
+            print("Player must choose a card to drop")
+
+    if matching_pair and sequential_pair:
+        print(f"GAME OVER!!! {current_player.name} WINS!!! \n")
 
 
 def check_for_duplicates(card_value_list):
-
     occurrences = []
     for item in card_value_list:
         count = 0
@@ -162,113 +185,21 @@ def check_for_duplicates(card_value_list):
     return list(duplicates)
 
 
-    """
-    matching_pair = False
-    seq_pair = False
-    for card in range(len(hand)):
-        card_values.append(hand[card].value)
-        card_values_set = set(card_values)
-        duplicate_card_value = [card for card, count in collections.Counter(card_values).items() if count > 1]
+def check_for_sequence(unique_card_values):
+    sequence_pair = False
 
-    if duplicate_card_value != []:
-        for card in range(len(duplicate_card_value)):
-            duplicate_card_value = duplicate_card_value[card]
-            print(duplicate_card_value)
-
-        for card in range(len(hand)):
-            if hand[card].value == duplicate_card_value:
-                duplicate_cards.append(hand[card])
-                matching_pair = True
-
-        print(duplicate_cards[:2])
-
+    sorted_list = sorted(unique_card_values)
+    # sorted(l) ==
+    range_list = list(range(min(unique_card_values), max(unique_card_values) + 1))
+    if sorted_list == range_list:
+        print("There are consecutive numbers")
+        sequence_pair = True
+        return sequence_pair
     else:
-        print(None)
+        print("There are no consecutive numbers")
+        sequence_pair = False
+        return sequence_pair
 
-    if matching_pair:
-        for card in range(len(card_values_set)):
-            print(card)
-            if card_values_set[card] == duplicate_card_value:
-                continue
-            else:
-                sequential_cards.append(hand[card])
-        print(sequential_cards)
-
-
-
-
-    unique = list(set(card_values))
-    print(f"UNIQUE VALUES => {unique}")
-
-    for value in range(len(unique)):
-        if unique[value] in duplicate_card_value:
-            duplicate_card_value = unique[value]
-            print(duplicate_card_value)
-
-    for card in range(len(hand)):
-        if hand[card].value == duplicate_card_value:
-            duplicate_cards.append(hand[card])
-            matching_pair = True
-
-    print(duplicate_cards)
-    print(hand)
-
-
-
-          
-    
-
-    if duplicate_card_value in unique:
-        unique.remove(duplicate_card_value)
-        print("These are the remaining unique cards: ", end="")
-        print(unique)
-
-        for card_value in range(len(unique)):
-            if hand[card_value].value in unique:
-                sequential_cards.append(hand[card_value])
-
-    else:
-        print("All values are unique!!")
-
-
-    print(sequential_cards)
-
-
-
-
-
-    try: # Try Checking for card duplicates in the player's hand
-        for card in range(len(hand)):
-            if hand[card].value == duplicate_card_value[0]:
-                duplicate_cards.append(hand[card])
-                hand.remove(hand[card])
-                matching_pair = True
-
-        print(duplicate_cards)
-        print(hand)
-
-    except: # If no Matching pairs then player drops one card and game proceeds
-        \"""
-        Since the player has no matching pair values in their hand,
-        there is not chance of winning, so they can drop a card
-        so that they remain with 3 cards and the next player can draw.
-        
-        \"""
-        print("No Matching Card values\n")
-        print("You need to drop one card for the game to proceed \n")
-        # If player does not win, they drop a card of their choice from their hand
-        # player.drop(player.hand, pool)
-
-    
-    # If player wins then game is over and they show their hand
-    game_over = f"GAME OVER!!! - Player {player.name} Has won!!!\n {player}"
-    winning_cards = []
-"""
-
-def check_for_sequencial():
-    pass
-
-# players = Game.game_players()
 
 # The unwanted cards will be thrown down into the pool
 card_pool = []
@@ -277,14 +208,14 @@ deck = cards.Deck()
 deck.shuffle()
 
 bob = Player('Bob')
-players = [bob, ]
+didi = Player('didi')
+players = [bob, didi]
 deck.deal(players)
 
 print(bob)
 bob.draw(deck)
+print(bob)
+check_winner(bob, bob.hand, card_pool)
+print(card_pool)
+print(bob)
 
-bob.show_hand()
-
-check_winner(bob, bob.hand)
-
-# next_player(current_player)
