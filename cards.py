@@ -23,7 +23,7 @@ class Deck:
 
     def build(self):
         for suit in ["Hearts", "Spades", "Clubs", "Diamonds"]:
-            for value in range(1, 11):
+            for value in range(1, 14):
                 self.cards.append(Card(suit, value))
 
     def show(self):
