@@ -1,6 +1,7 @@
 import cards
 import random
 import collections
+import time
 
 
 class Player:
@@ -9,10 +10,15 @@ class Player:
         self.hand = []
 
     def draw(self, deck):
-        self.hand.append(deck.cards.pop())
+        assert len(self.hand) < 4
+        try:
+            new_card = deck.cards.pop()
+            self.hand.append(new_card)
+        except:
+            print("Error: The Deck is empty!")
         return self
 
-    def drop(self, hand, card_pool):
+    def drop(self, hand, pool):
         # The user will enter the index of the card they want to drop
         """
         from their hand we need to find the exact card value that means
@@ -26,10 +32,10 @@ class Player:
 
         self.show_hand()
         try:
-            index = int(input("Enter the card value you want to drop! "))
+            index = int(input("\nEnter the card value you want to drop! "))
             card_index = index - 1
             dropped_card = self.hand.pop(card_index)
-            card_pool.append(dropped_card)
+            pool.append(dropped_card)
         except:
             print("You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!")
 
@@ -78,27 +84,13 @@ def check_for_sequence(unique_card_values):
 
 
 # Checks for the winner
-def check_winner(players_list, hand, card_pool):
+def check_winner(hand):
     """
     Checks for the winner of the game
-    :param players:
-    :param players list:
-    :param current player hand list:
-    :param card_pool:
-    :return: True if player wins the game.
     """
 
-    current_player = None
-    for player in range(len(players_list)):
-        if players_list[player].hand == hand:
-            current_player = players_list[player]
-    print(f"CURRENT PLAYER = {current_player}")
-
     card_values = []
-    card_values_set = set()
 
-    duplicate_card_values = []
-    duplicate_value = None
     duplicate_pair_1 = None
     duplicate_pair_2 = None
     duplicate_cards = []
@@ -110,7 +102,13 @@ def check_winner(players_list, hand, card_pool):
     sequential_pair = False
 
     winning_cards = []
-    winner = False
+
+    """
+    The player holds 4 cards at this point. we want to know if any of the cards are duplicates or
+    sequential to each other...
+    
+    After which we will make a list of the duplicates and sequential cards to be combined later.
+    """
 
     for card in range(len(hand)):
         # makes a list of the values for each card
@@ -156,6 +154,7 @@ def check_winner(players_list, hand, card_pool):
         for card in range(len(hand)):
             if hand[card].value == duplicate_value:
                 duplicate_cards.append(hand[card])
+                time.sleep(0.5)
 
             if len(duplicate_cards) == 2:
                 matching_pair = True
@@ -192,83 +191,115 @@ def check_winner(players_list, hand, card_pool):
     else:
         # player must choose a card to drop
         # after player has dropped a card into the pool, next player can draw
-        print(f"ALL CARDS ARE UNIQ CARDS = {current_player.hand}")
-        print("You must drop a card for the next player to go!")
-        while not card_pool:
-            card_pool = current_player.drop(current_player.hand, card_pool)
-            if card_pool:
-                print(f"{current_player.name} dropped {card_pool[-1]}")
-                return card_pool, current_player
-
+        winner = False
+        print(f"ALL CARDS ARE UNIQ CARDS = {hand} \n")
+        time.sleep(0.5)
+        print("Close but No cigar! You must drop a card for the next player to go!")
         # Now go to next_player()
+        return winner
 
     if matching_pair:
         print(f"IF DUPLICATE CARDS = {duplicate_cards}")
         for card in range(len(hand)):
             if hand[card].value not in duplicate_card_values:
-                unique_cards.append(current_player.hand[card])
+                unique_cards.append(hand[card])
         print(f"THEN UNIQUE CARDS = {unique_cards}")
 
         # Bool - Checks for consecutive numbers for the cards - Returns True or False
         sequential_pair = check_for_sequence(unique_card_values)
         if sequential_pair:
             sequential_cards = unique_cards
+            print(f"THE UNIQUE CARDS = {unique_cards} ARE SEQUENTIAL!")
 
         else:
+            winner = False
             print("Close but No cigar! You must drop a card for the next player to go!")
-            card_pool = current_player.drop(current_player.hand, card_pool)
-            print(f"{current_player.name} dropped {card_pool[-1]}")
-            print(f"{current_player}")
-            return card_pool, current_player
+            return winner
 
     if matching_pair and sequential_pair:
-        print(f"GAME OVER!!! {current_player.name} WINS!!!")
+        winner = True
         winning_cards.extend(duplicate_cards)
         winning_cards.extend(sequential_cards)
         print(f"WINNING CARDS = {winning_cards}")
+        return winner
 
 
-# Initialize Game players, number of players and names.
-def game_players():
-    # initialize the number of players, their names and their hands.
-    # numbers of players is variable. max number will be 5 players
-    number_of_players = int(input("Enter the number of player: "))
+def players_init():
+    """
+    Initialize the number of players, their names and their hands.
+    Numbers of players is variable. max number will be 5 players
+    :return: A list of players
+    """
+
+    num_of_players = int(input("Enter the number of player: "))
     players_list = []
-    for i in range(number_of_players):  # Initialising a list of players
+    for i in range(num_of_players):
         # Instantiate player objects and initialise their hands
         players_list.append(Player(input(f"Enter Player {i + 1}'s name: ")))
-    return players_list
+    return players_list, num_of_players
 
 
-# move to the next play
-def next_player(current_player, deck):
-    pass
+def first_drawer(players, number_of_players):
+    random_num = random.randint(0, number_of_players)
+    first_player = players[random_num - 1]
+    return first_player
 
 
-# The unwanted cards will be thrown down into the pool
+# LET THE GAMES BEGIN!!!
+
+players_list, num_of_players = players_init()
+
+restart = False
+game_over = False
+
+# Initializes a card deck, card pool, shuffles the cards and deals out 3 cards to each player
+card_deck = cards.Deck()
+card_deck.shuffle()
+
+# Deal each player 3 cards
+card_deck.deal(players_list)
+
+# Initializes a pool where cards will be thrown.
 card_pool = []
 
-deck = cards.Deck()
-deck.shuffle()
+# The first player to draw is chosen at random
+first_to_play = first_drawer(players_list, num_of_players)
+player_index = players_list.index(first_to_play)
 
-bob = Player('Bob')
-didi = Player('didi')
-players = [bob, didi]
-deck.deal(players)
+draw_counts = 0
 
-bob.draw(deck)
-check_winner(players, bob.hand, card_pool)
-# print(f"Card at the top of the pool is {card_pool}")
+# game_over = check_winner(players_list, first_hand, card_pool)
+while not game_over:
 
+    # Goes back to the first player in the list.
+    if player_index == num_of_players:
+        player_index = 0
 
-class Game:
-    def __init__(self):
-        pass
+    # The current player will draw a card from the deck
+    current_player = players_list[player_index]
+    current_player.draw(card_deck)
 
-    def play(self, player, deck):
-        player.draw(deck)
-        game_over = check_winner(player, player.hand)
+    # Now the game will check for a winner and return True or False in relation to the game over function
+    game_over = check_winner(current_player.hand)
+    time.sleep(0.5)
 
-        if not game_over:
-            next_player()
-            # We may need to check if the deck is still having cards
+    # if the current player wins the game, we need to break out of the loop!
+    if game_over:
+        print(f"{current_player} WINS")
+        break
+
+    # We need to make sure each player does not get more that 4 cards!
+    # So the current player need to drop a card before the next player can have a go!
+    elif len(current_player.hand) == 4 and not card_pool:
+        card_pool = current_player.drop(current_player.hand, card_pool)
+
+    try:
+        print(f"{current_player.name} dropped {card_pool[-1]}")
+    except:
+        print("There are no cards in the Pool")
+
+    finally:
+        print(f"Card at the top of the pool is {card_pool[-1]} \n")
+
+    player_index += 1
+    draw_counts += 1
