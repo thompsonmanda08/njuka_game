@@ -10,7 +10,7 @@ class Player:
         self.hand = []
 
     def draw(self, deck):
-        assert len(self.hand) < 4
+        assert len(self.hand) <= 4
         try:
             new_card = deck.cards.pop()
             self.hand.append(new_card)
@@ -18,7 +18,7 @@ class Player:
             print("Error: The Deck is empty!")
         return self
 
-    def drop(self, hand, pool):
+    def drop(self, hand):
         # The user will enter the index of the card they want to drop
         """
         from their hand we need to find the exact card value that means
@@ -34,12 +34,12 @@ class Player:
         try:
             index = int(input("\nEnter the card value you want to drop! "))
             card_index = index - 1
-            dropped_card = self.hand.pop(card_index)
-            pool.append(dropped_card)
-        except:
-            print("You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!")
+            drop = self.hand.pop(card_index)
+            return drop
 
-        return card_pool
+        except:
+            drop_error = "You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!"
+            return drop_error
 
     def show_hand(self):
         index = 1
@@ -290,8 +290,9 @@ while not game_over:
 
     # We need to make sure each player does not get more that 4 cards!
     # So the current player need to drop a card before the next player can have a go!
-    elif len(current_player.hand) == 4 and not card_pool:
-        card_pool = current_player.drop(current_player.hand, card_pool)
+    if len(current_player.hand) == 4:
+        dropped_card = current_player.drop(current_player.hand)
+        card_pool.append(dropped_card)
 
     try:
         print(f"{current_player.name} dropped {card_pool[-1]}")
