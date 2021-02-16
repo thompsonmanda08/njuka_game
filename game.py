@@ -72,8 +72,12 @@ def check_for_duplicates(card_value_list):
 
 
 def check_for_sequence(unique_card_values):
-    sorted_list = sorted(unique_card_values)
-    range_list = list(range(min(unique_card_values), max(unique_card_values) + 1))
+    
+    try:
+        sorted_list = sorted(unique_card_values)
+        range_list = list(range(min(unique_card_values), max(unique_card_values) + 1))
+    except TypeError:
+        print("type error is occuring here!!!")
 
     if sorted_list == range_list:
         print("CONSECUTIVE NUMBERS EXIST!")
@@ -280,6 +284,14 @@ while not game_over:
     current_player.draw(card_deck)
 
     # Now the game will check for a winner and return True or False in relation to the game over function
+    """
+    Here we can also allow the current player to make two choices:
+    1. Check for a win
+    2. Drop a card
+    
+    """
+
+
     game_over = check_winner(current_player.hand)
     time.sleep(0.5)
 
