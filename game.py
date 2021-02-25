@@ -2,58 +2,11 @@ import cards
 import random
 import collections
 import time
-
-
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.hand = []
-
-    def draw(self, deck):
-        assert len(self.hand) <= 4
-        try:
-            new_card = deck.cards.pop()
-            self.hand.append(new_card)
-        except:
-            print("Error: The Deck is empty!")
-        return self
-
-    def drop(self, hand):
-        # The user will enter the index of the card they want to drop
-        """
-        from their hand we need to find the exact card value that means
-         listing the cards out for the user so that they an specifically
-         choose an index of the card they wish to discard from their hand
-          and remove it then send that card to the pool.
-
-          This part could use more thinking...
-          am not sure what I just did but am hopping it works
-        """
-
-        self.show_hand()
-        try:
-            index = int(input("\nEnter the card value you want to drop! "))
-            card_index = index - 1
-            drop = self.hand.pop(card_index)
-            return drop
-
-        except:
-            drop_error = "You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!"
-            return drop_error
-
-    def show_hand(self):
-        index = 1
-        for card in self.hand:
-            print(f"{index}.) ", end="")
-            index += 1
-            print(card)
-            # card.display()
-
-    def __str__(self):
-        return f'{self.name} =>> {self.hand}'
+import player as P
 
 
 def check_for_duplicates(card_value_list):
+    """Function returns a list of duplicates from a list of numbers."""
     occurrences = []
     for item in card_value_list:
         count = 0
@@ -72,7 +25,7 @@ def check_for_duplicates(card_value_list):
 
 
 def check_for_sequence(unique_card_values):
-    
+
     try:
         sorted_list = sorted(unique_card_values)
         range_list = list(range(min(unique_card_values), max(unique_card_values) + 1))
@@ -110,7 +63,7 @@ def check_winner(hand):
     """
     The player holds 4 cards at this point. we want to know if any of the cards are duplicates or
     sequential to each other...
-    
+
     After which we will make a list of the duplicates and sequential cards to be combined later.
     """
 
@@ -131,7 +84,8 @@ def check_winner(hand):
 
         if len(card_values_set) == 3:  # This means there is one pair of duplicates
             card_values_set.remove(duplicate_value)  # removes the duplicate value from set
-            unique_card_values = list(card_values_set)  # makes a list of the unique values after removing the duplicate
+            # makes a list of the unique values after removing the duplicate
+            unique_card_values = list(card_values_set)
 
         elif len(card_values_set) == 2:
 
@@ -143,10 +97,10 @@ def check_winner(hand):
              It so happens that the set() function will remove that value as well and then
              we end up with only one unique value which is not the case.
              We will look into this later!!!
-            
+
             This means there one duplicate pair and a loose value or
             there could be 2 pairs of duplicate
-            
+
             So lets deal with these one by one.
             """
             # Assuming there are two pairs of duplicates:
@@ -155,6 +109,7 @@ def check_winner(hand):
             print(f"CARD VALUE SET = {card_values_set}")
 
         # Finds the duplicate card values and appends them to a new list
+
         for card in range(len(hand)):
             if hand[card].value == duplicate_value:
                 duplicate_cards.append(hand[card])
@@ -176,15 +131,15 @@ def check_winner(hand):
             Now that we have the duplicate pair values we can extract each of these
             cards from the players hands and ask the player which pair they would like
             to keep.
-            
+
             After choosing to keep one pair... the other pair is dropped into the card pool
             and the player can draw one more extra card to make their hand
             complete so that the game can proceed to the next player.
-            
+
             On the on other hand the player may not want to tell their opponent that they have
             2 pairs of duplicates and in this case the player will want to drop one card and then
             continue playing their strategy
-            
+
             """
 
             matching_pair = True
@@ -238,8 +193,9 @@ def players_init():
     num_of_players = int(input("Enter the number of player: "))
     players_list = []
     for i in range(num_of_players):
-        # Instantiate player objects and initialise their hands
-        players_list.append(Player(input(f"Enter Player {i + 1}'s name: ")))
+        # Instantiate player objects and initialise their hands from imported player module
+        player = P.NjukaPlayer(input(f"Enter Player {i + 1}'s name: "))
+        players_list.append(player)
     return players_list, num_of_players
 
 
@@ -288,9 +244,8 @@ while not game_over:
     Here we can also allow the current player to make two choices:
     1. Check for a win
     2. Drop a card
-    
-    """
 
+    """
 
     game_over = check_winner(current_player.hand)
     time.sleep(0.5)
