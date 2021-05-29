@@ -123,7 +123,7 @@ def check_winner(hand):
 
     duplicate_pair_1 = None
     duplicate_pair_2 = None
-    duplicate_cards = []
+    duplicate_cards = {}
     matching_pair = False
 
     unique_card_values = None
@@ -144,65 +144,33 @@ def check_winner(hand):
         # makes a list of the values for each card
         card_values.append(hand[card].value)
 
-    # check the list of card values for duplicates and returns a list of the duplicates
-    duplicate_card_values = get_duplicates(card_values)
+    # check the list of card values for duplicates and returns a dictionary if any duplicates
+    duplicate_cards = get_duplicates(card_values)
 
-    if len(duplicate_card_values) == 1:  # checks if there is any duplicate card values
-        # for duplicate card value we card find the cards with
-        # filters out the duplicate values with a set leaving only unique values
-        # however one of the cards is a duplicate value
-        duplicate_value = duplicate_card_values[0]
-        card_values_set = set(card_values)
+    if duplicate_cards is not None:
+        duplicate_pair_1 = duplicate_cards['duplicates']
 
-        if len(card_values_set) == 3:  # This means there is one pair of duplicates
-            card_values_set.remove(duplicate_value)  # removes the duplicate value from set
-            # makes a list of the unique values after removing the duplicate
-            unique_card_values = list(card_values_set)
-
-        # collects the duplicate cards and appends them to a new list!
-        duplicate_cards = collect_twin_cards(hand, duplicate_value)
-
-    # This is for cases when a player has two pairs of duplicate cards
-    elif len(duplicate_card_values) == 2:
-        print("You have a collision Pair, you need to drop one card pair:")
-        duplicate_pair_1, duplicate_pair_2 = collision_cards(hand, duplicate_card_values)
-        matching_pair = True
-        duplicate_cards = handle_collision_pairs(duplicate_pair_1, duplicate_pair_2)
-
-    # If No duplicates found then there is no chance of winning next player must go!
-    else:
-        # player must choose a card to drop
-        winner = False
-        print("Close but No cigar! You must drop a card for the next player to go!")
-        print(f"ALL  YOUR CARDS ARE UNIQ CARDS = {hand} \n")
-        time.sleep(0.5)
-
-        return winner
-
-    if matching_pair:
-        print(f"IF DUPLICATE CARDS = {duplicate_cards}")
-        for card in range(len(hand)):
-            if hand[card].value not in duplicate_card_values:
-                unique_cards.append(hand[card])
-        print(f"THEN UNIQUE CARDS = {unique_cards}")
-
-        # Bool - Checks for consecutive numbers for the cards - Returns True or False
-        sequential_pair = check_for_sequence(unique_card_values)
-        if sequential_pair:
-            sequential_cards = unique_cards
-            print(f"THE UNIQUE CARDS = {unique_cards} ARE SEQUENTIAL!")
-
+        # If there is more than one pair of duplicate cards the the player has a collision
+        # If collision, drop 1 duplicate pair else collect duplicates & run unique cards
+        if duplicate_cards['unique'][0] == duplicate_cards['unique'][1]:
+            duplicate_pair_2 = duplicate_cards['unique']
+            collision_cards(card_values)
         else:
-            winner = False
-            print("Close but No cigar! You must drop a card for the next player to go!")
-            return winner
+            unique_cards = duplicate_cards['unique']
 
-    if matching_pair and sequential_pair:
-        winner = True
-        winning_cards.extend(duplicate_cards)
-        winning_cards.extend(sequential_cards)
-        print(f"WINNING CARDS = {winning_cards}")
-        return winner
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def players_init():
