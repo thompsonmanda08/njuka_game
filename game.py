@@ -5,23 +5,24 @@ import time
 import player as P
 
 
-def check_for_duplicates(card_value_list):
-    """Function returns a list of duplicates from a list of numbers."""
-    occurrences = []
-    for item in card_value_list:
-        count = 0
-        for x in card_value_list:
-            if x == item:
-                count += 1
-        occurrences.append(count)
+def get_duplicates(player_hand: list[int]):
+    separated_hand = None
+    for potential_duplicate in player_hand:
+        # here remainder is just the player's hand minus the current card we're iterating over
+        remainder = player_hand.copy()
+        remainder.remove(potential_duplicate)  # remainder = 3 cards
 
-    duplicates = set()
-    index = 0
-    while index < len(card_value_list):
-        if occurrences[index] != 1:
-            duplicates.add(card_value_list[index])
-        index += 1
-    return list(duplicates)
+        # if the removed value is still present in remainder then we have a duplicate
+        if potential_duplicate in remainder:
+            remainder.remove(potential_duplicate)  # remove it again to remain with your two unique cards
+            separated_hand = {
+                "duplicates": [potential_duplicate, potential_duplicate],
+                "unique": remainder
+            }
+            # break  # we break out of the loop as soon as we find the first value with a duplicate
+            return separated_hand  # alternatively we could return separated_hand right inside the if block,
+            # that would also break the loop
+    return separated_hand
 
 
 def check_for_sequence(unique_card_values):
@@ -38,6 +39,78 @@ def check_for_sequence(unique_card_values):
     else:
         print("NO CONSECUTIVE NUMBERS!")
         return False
+
+
+def collect_twin_cards(hand, dup_card_val):
+    twin_cards = []
+    for card in range(len(hand)):
+        if hand[card].value == dup_card_val:
+            twin_cards.append(hand[card])
+
+        if len(twin_cards) == 2:
+            break
+    return twin_cards
+
+
+# A state of having to a double duplicate card situation:
+# A player must choose which card pair they would like to continue the game with!
+def collision_cards(hand, dup_card_values):
+    """ (list, list) -> list, list
+    Returns 2 lists of card values that are identical and cause a collision
+    on winning duplicate cards.
+
+    Now that we have the duplicate pair values we can extract each of these
+    cards from the players hands and ask the player which pair they would like
+    to keep.
+
+    After choosing to keep one pair... the other pair is dropped into the card pool
+    and the player can draw one more extra card to make their hand
+    complete so that the game can proceed to the next player.
+
+    On the on other hand the player may not want to tell their opponent that they have
+    2 pairs of duplicates and in this case the player will want to drop one card and then
+    continue playing their strategy
+
+    """
+
+    dup_card_pair_1 = []
+    dup_card_pair_2 = []
+
+    assert len(dup_card_values) == 2
+
+    for value in range(len(dup_card_values) - 1):
+        dup_pair_val_1 = dup_card_values[value]
+        dup_pair_val_2 = dup_card_values[value + 1]
+
+    for card in len(hand):
+
+        if hand[card].value == dup_pair_val_1:
+            dup_card_pair_1.append(hand[card].value)
+
+        else:
+            dup_pair_val_2.append(hand[card].value)
+
+    return dup_card_pair_1, dup_card_pair_2
+
+
+def handle_collision_pairs(pair_1, pair_2):
+    choice = False
+    print(f"1. {pair_1}")
+    print(f"2. {pair_2} \n")
+
+    while not choice:
+        try:
+            choice = int(input("Choose the pair you wish to discard: "))
+            if choice == 1:
+                choice = True
+                return pair_1
+
+            elif choice == 2:
+                choice = True
+                return pair_2
+
+        except:
+            print("Enter a Number with respect to the pair you want to discard!")
 
 
 # Checks for the winner
@@ -72,89 +145,38 @@ def check_winner(hand):
         card_values.append(hand[card].value)
 
     # check the list of card values for duplicates and returns a list of the duplicates
-    duplicate_card_values = check_for_duplicates(card_values)
+    duplicate_card_values = get_duplicates(card_values)
 
     if len(duplicate_card_values) == 1:  # checks if there is any duplicate card values
         # for duplicate card value we card find the cards with
-        duplicate_value = duplicate_card_values[0]
-
-        card_values_set = set(card_values)
         # filters out the duplicate values with a set leaving only unique values
         # however one of the cards is a duplicate value
+        duplicate_value = duplicate_card_values[0]
+        card_values_set = set(card_values)
 
         if len(card_values_set) == 3:  # This means there is one pair of duplicates
             card_values_set.remove(duplicate_value)  # removes the duplicate value from set
             # makes a list of the unique values after removing the duplicate
             unique_card_values = list(card_values_set)
 
-        elif len(card_values_set) == 2:
-
-            """
-             By running the above code there is chance that the dupplicate value appears 3 times
-             and so there is still a bug, because by removing the duplicate value all 3 cards that
-             are supposedly the same will be removed.
-
-             It so happens that the set() function will remove that value as well and then
-             we end up with only one unique value which is not the case.
-             We will look into this later!!!
-
-            This means there one duplicate pair and a loose value or
-            there could be 2 pairs of duplicate
-
-            So lets deal with these one by one.
-            """
-            # Assuming there are two pairs of duplicates:
-
-            print("There are more than 2 identical card values")
-            print(f"CARD VALUE SET = {card_values_set}")
-
-        # Finds the duplicate card values and appends them to a new list
-
-        for card in range(len(hand)):
-            if hand[card].value == duplicate_value:
-                duplicate_cards.append(hand[card])
-                time.sleep(0.5)
-
-            if len(duplicate_cards) == 2:
-                matching_pair = True
-                break
+        # collects the duplicate cards and appends them to a new list!
+        duplicate_cards = collect_twin_cards(hand, duplicate_value)
 
     # This is for cases when a player has two pairs of duplicate cards
     elif len(duplicate_card_values) == 2:
-        print("There are two duplicate card values")
-        for value in range(len(duplicate_card_values) - 1):
-            # User may need to be asked what pair they want to use.
-            duplicate_pair_1 = duplicate_card_values[value]
-            duplicate_pair_2 = duplicate_card_values[value + 1]
-
-            """
-            Now that we have the duplicate pair values we can extract each of these
-            cards from the players hands and ask the player which pair they would like
-            to keep.
-
-            After choosing to keep one pair... the other pair is dropped into the card pool
-            and the player can draw one more extra card to make their hand
-            complete so that the game can proceed to the next player.
-
-            On the on other hand the player may not want to tell their opponent that they have
-            2 pairs of duplicates and in this case the player will want to drop one card and then
-            continue playing their strategy
-
-            """
-
-            matching_pair = True
-        print(f"Pair 1: {duplicate_pair_1}")
-        print(f"Pair 2: {duplicate_pair_2}")
+        print("You have a collision Pair, you need to drop one card pair:")
+        duplicate_pair_1, duplicate_pair_2 = collision_cards(hand, duplicate_card_values)
+        matching_pair = True
+        duplicate_cards = handle_collision_pairs(duplicate_pair_1, duplicate_pair_2)
 
     # If No duplicates found then there is no chance of winning next player must go!
     else:
         # player must choose a card to drop
-        # after player has dropped a card into the pool, next player can draw
         winner = False
-        print(f"ALL CARDS ARE UNIQ CARDS = {hand} \n")
-        time.sleep(0.5)
         print("Close but No cigar! You must drop a card for the next player to go!")
-        # Now go to next_player()
+        print(f"ALL  YOUR CARDS ARE UNIQ CARDS = {hand} \n")
+        time.sleep(0.5)
+
         return winner
 
     if matching_pair:
@@ -204,8 +226,8 @@ def first_drawer(players, number_of_players):
     first_player = players[random_num - 1]
     return first_player
 
-
 # LET THE GAMES BEGIN!!!
+
 
 players_list, num_of_players = players_init()
 

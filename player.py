@@ -27,25 +27,27 @@ class NjukaPlayer:
           This part could use more thinking...
           am not sure what I just did but am hopping it works
         """
+        done = False
+        while not done:
+            self.show_hand()
+            try:
+                index = int(input("\nEnter the card value you want to drop! "))
+                card_index = index - 1
+                drop = self.hand.pop(card_index)
+                done = True
+                return drop
 
-        self.show_hand()
-        try:
-            index = int(input("\nEnter the card value you want to drop! "))
-            card_index = index - 1
-            drop = self.hand.pop(card_index)
-            return drop
-
-        except:
-            drop_error = "You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!"
-            return drop_error
+            except:
+                drop_error = "You only have 4 cards in your hand, choose numbers from 1 to 4 to pick a card!"
+                return drop_error
 
     def show_hand(self):
         index = 1
         for card in self.hand:
             print(f"{index}.) ", end="")
             index += 1
-            print(card)
-            # card.display()
+            # print(card)
+            card.display()
 
     def __str__(self):
         return f'{self.name} =>> {self.hand}'
